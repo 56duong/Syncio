@@ -8,15 +8,17 @@ import javax.swing.JButton;
 import online.syncio.model.MyFont;
 
 public class Main extends javax.swing.JFrame {
-    JButton [] btnMenuList;
+
+    JButton[] btnMenuList;
     public static String prevTab, curTab;
-    
+    public MyFont myFont = new MyFont();
+
     public Main() {
         setUndecorated(true);
         initComponents();
         setBackground(new Color(0f, 0f, 0f, 0f));
         setLocationRelativeTo(null);
-        
+
         // tab
         pnlTabContent.setLayout(new CardLayout());
         pnlTabContent.add(new Home(), "home");
@@ -25,21 +27,27 @@ public class Main extends javax.swing.JFrame {
         pnlTabContent.add(new Notification(), "notifications");
         pnlTabContent.add(new Create(), "create");
         pnlTabContent.add(new Profile(), "profile");
-        
-        btnMenuList = new JButton[] {btnHome, btnSearch, btnMessage, btnNotification, btnCreate, btnProfile};
-        for(JButton btn : btnMenuList) {
+
+        btnMenuList = new JButton[]{btnHome, btnSearch, btnMessage, btnNotification, btnCreate, btnProfile};
+
+        for (JButton btn : btnMenuList) {
+            btn.setFont(myFont.SFProDisplayRegular);
+            btn.setFont(btn.getFont().deriveFont(16f));
+        }
+        for (JButton btn : btnMenuList) {
             btn.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    // mau chu
-                    for(JButton btn : btnMenuList) {
-                        btn.setFont(new MyFont().SFProDisplayRegular);
-                        btn.setFont(btn.getFont().deriveFont(16f));
-                    }
-                    JButton b = (JButton)e.getSource();
-                    b.setFont(new MyFont().SFProDisplayBold);
+                    JButton b = (JButton) e.getSource();
+                    b.setFont(myFont.SFProDisplayBold);
                     b.setFont(b.getFont().deriveFont(16f));
-                    
+
+                    for (JButton btn : btnMenuList) {
+                        if (btn != b) {
+                            btn.setFont(myFont.SFProDisplayRegular);
+                        }
+                    }
+
                     // show tab
                     String name = e.getActionCommand().toLowerCase().replaceAll(" ", "");
                     showTab(name);
@@ -47,12 +55,10 @@ public class Main extends javax.swing.JFrame {
             });
         }
     }
-    
-    
-    
+
     /**
      * Shows the specified tab.
-     * 
+     *
      * @param newTab The name of the tab to be shown.
      */
     public static void showTab(String newTab) {
@@ -61,8 +67,6 @@ public class Main extends javax.swing.JFrame {
         CardLayout c = (CardLayout) pnlTabContent.getLayout();
         c.show(pnlTabContent, curTab);
     }
-    
-    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -187,7 +191,7 @@ public class Main extends javax.swing.JFrame {
 
         pnlTabContent.setBackground(null);
         pnlTabContent.setRoundBottomRight(20);
-        pnlTabContent.setLayout(new java.awt.BorderLayout());
+        pnlTabContent.setLayout(new java.awt.CardLayout());
         pnlMain.add(pnlTabContent, java.awt.BorderLayout.CENTER);
 
         getContentPane().add(pnlMain, java.awt.BorderLayout.CENTER);
@@ -206,7 +210,7 @@ public class Main extends javax.swing.JFrame {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
