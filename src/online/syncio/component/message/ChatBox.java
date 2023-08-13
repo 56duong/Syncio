@@ -93,7 +93,7 @@ public class ChatBox extends JComponent {
         text.setOpaque(false);
         text.setEditable(false);
 
-        text.setText(message.getMessage());
+        text.setText(message.getText());
         labelDate = new JLabel(message.getSender() + " | " + message.getDateSent());
         labelDate.setForeground(new Color(127, 127, 127));
         labelDate.setFont(regularFont);

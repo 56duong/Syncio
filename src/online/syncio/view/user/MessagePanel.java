@@ -49,6 +49,7 @@ public class MessagePanel extends JPanel {
         pnlUsers = new javax.swing.JPanel();
         scrollPane = new online.syncio.component.MyScrollPane();
         pnlUserList = new javax.swing.JPanel();
+        btnCreateGroup = new online.syncio.component.MyButton();
         pnlChatArea = new javax.swing.JPanel();
 
         setBackground(new java.awt.Color(0, 204, 0));
@@ -67,15 +68,28 @@ public class MessagePanel extends JPanel {
         pnlUserList.setLayout(new javax.swing.BoxLayout(pnlUserList, javax.swing.BoxLayout.LINE_AXIS));
         scrollPane.setViewportView(pnlUserList);
 
+        btnCreateGroup.setBackground(new java.awt.Color(0, 149, 246));
+        btnCreateGroup.setForeground(new java.awt.Color(255, 255, 255));
+        btnCreateGroup.setText("CREATE A GROUPCHAT");
+        btnCreateGroup.setToolTipText("");
+        btnCreateGroup.setBorderColor(new java.awt.Color(255, 255, 255));
+        btnCreateGroup.setBorderThickness(0);
+        btnCreateGroup.setFont(new java.awt.Font("SF Pro Display Medium", 1, 16)); // NOI18N
+        btnCreateGroup.setRadius(0);
+
         javax.swing.GroupLayout pnlUsersLayout = new javax.swing.GroupLayout(pnlUsers);
         pnlUsers.setLayout(pnlUsersLayout);
         pnlUsersLayout.setHorizontalGroup(
             pnlUsersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
+            .addComponent(btnCreateGroup, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         pnlUsersLayout.setVerticalGroup(
             pnlUsersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(scrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 725, Short.MAX_VALUE)
+            .addGroup(pnlUsersLayout.createSequentialGroup()
+                .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 675, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnCreateGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pnlChatArea.setBackground(new java.awt.Color(255, 255, 255));
@@ -98,15 +112,16 @@ public class MessagePanel extends JPanel {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 725, Short.MAX_VALUE)
+            .addGap(0, 732, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(pnlChatArea, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 725, Short.MAX_VALUE))
+                .addComponent(pnlChatArea, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 732, Short.MAX_VALUE))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(pnlUsers, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private online.syncio.component.MyButton btnCreateGroup;
     private javax.swing.JPanel pnlChatArea;
     private javax.swing.JPanel pnlUserList;
     private javax.swing.JPanel pnlUsers;

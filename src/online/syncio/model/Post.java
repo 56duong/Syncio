@@ -4,19 +4,38 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import online.syncio.utils.TimeHelper;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 
 public class Post {
 
+    @BsonId
     private ObjectId id;
+
+    @BsonProperty("userID")
     private String userID = "";
+
+    @BsonProperty("caption")
     private String caption = "";
+
+    @BsonProperty("datePosted")
     private String datePosted = TimeHelper.getCurrentDateTime();
+
+    @BsonProperty("photoList")
     public List<Binary> photoList;
+
+    @BsonProperty("likeList")
     private List<UserIDAndDate> likeList = new ArrayList<>();
+
+    @BsonProperty("commentList")
     private List<UserIDAndDateAndText> commentList = new ArrayList<>();
+
+    @BsonProperty("repostList")
     private List<UserIDAndDateAndText> reportList = new ArrayList<>();
+
+    @BsonProperty("flag")
     private int flag;
 
     public Post() {

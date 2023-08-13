@@ -4,17 +4,18 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
 import javax.swing.Box;
-import online.syncio.component.SearchedUserCard;
+import online.syncio.component.SearchedCard;
 import online.syncio.component.message.ChatArea;
-import online.syncio.dao.MessageDAO;
+import online.syncio.dao.ConversationDAO;
 import online.syncio.dao.MongoDBConnect;
 import online.syncio.dao.UserDAO;
 import online.syncio.model.LoggedInUser;
 import online.syncio.model.User;
 import online.syncio.view.user.MessagePanel;
+import org.bson.types.ObjectId;
 
 public class MessageController {
 
@@ -22,12 +23,13 @@ public class MessageController {
     private CardLayout cardLayout;
 
     private UserDAO userDAO = MongoDBConnect.getUserDAO();
-    private MessageDAO messageDAO = MongoDBConnect.getMessageDAO();
-    private Set<String> messageUserSet = new HashSet<>();
+    private ConversationDAO conversationDAO = MongoDBConnect.getConversationDAO();
+    private List<Object> historyList;
+
+    private HashMap<String, Component> chatAreas = new HashMap<>();
 
     public MessageController(MessagePanel pnlMsg) {
         this.pnlMsg = pnlMsg;
-
         cardLayout = (CardLayout) pnlMsg.getChatArea().getLayout();
     }
 
@@ -42,75 +44,105 @@ public class MessageController {
     public void addUserToHistoryPanel() {
         pnlMsg.getPnlUserList().removeAll();
 
-        messageUserSet = messageDAO.getMessagingUsers(LoggedInUser.getCurrentUser().getUsername());
+        historyList = conversationDAO.findAllMessageHistory(LoggedInUser.getCurrentUser().getUsername());
 
-        for (String username : messageUserSet) {
-            createCardForHistoryPanel(username);
+        for (Object o : historyList) {
+            if (o instanceof ObjectId groupChat) {
+                createCardForGroup(groupChat.toString());
+            } else if (o instanceof String name) {
+                createCardForUser(name);
+            }
         }
 
         pnlMsg.getPnlUserList().revalidate();
         pnlMsg.getPnlUserList().repaint();
     }
 
-    public void createCardForHistoryPanel(String username) {
-        User user = userDAO.getByUsername(username);
+    private void createCard(String identifier, User user) {
+        SearchedCard card = new SearchedCard();
 
-        SearchedUserCard card = new SearchedUserCard(user);
-        card.setName(username.trim());
+        if (user != null) {
+            card.setUser(user);
+            card.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    openMessage(card.getUser().getUsername());
+                }
+            });
+        } else {
+            card.setConversationID(identifier);
+            card.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    openMessage(card.getConversationID());
+                }
+            });
+        }
 
-        card.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                openMessage(card.getUser().getUsername().trim());
-            }
-        });
+        card.setName(identifier);
 
         pnlMsg.getPnlUserList().add(card);
-        Box.createVerticalStrut(20);
-
-        pnlMsg.getPnlUserList().revalidate();
-        pnlMsg.getPnlUserList().repaint();
+        pnlMsg.getPnlUserList().add(Box.createVerticalStrut(20));
     }
 
-    public void openMessage(String messagingUsername) {
-        Component[] componentList = pnlMsg.getChatArea().getComponents();
+    public void createCardForGroup(String conversationID) {
+        createCard(conversationID, null);  // Replace with actual user data
+    }
 
-        boolean found = false;
+    public void createCardForUser(String username) {
+        User user = userDAO.getByUsername(username);
 
-        User messagingUser = userDAO.getByUsername(messagingUsername);
+        if (user != null) {
+            createCard(username, user);
+        }
+    }
 
-        try {
-            for (Component c : componentList) {
-                if (c instanceof ChatArea
-                        && c.getName().equalsIgnoreCase(messagingUser.getUsername())) {
-                    cardLayout.show(pnlMsg.getChatArea(), messagingUser.getUsername());
-                    found = true;
+    public void openMessage(String textString) {
+        Component chatArea = chatAreas.get(textString);
 
-                    break;
-                }
+        if (chatArea == null) {
+            User messagingUser = userDAO.getByUsername(textString);
+            if (messagingUser != null) {
+                createUserMessagePanel(messagingUser);
+            } else {
+                createGroupChatMessagePanel(textString);
             }
-        } catch (Exception e) {
-            createMessage(messagingUser);
-            found = true;
-        }
-
-        if (!found) {
-            createMessage(messagingUser);
+        } else {
+            cardLayout.show(pnlMsg.getChatArea(), textString);
         }
     }
 
-    public void createMessage(User messagingUser) {
+    public void createUserMessagePanel(User messagingUser) {
         String username = messagingUser.getUsername();
 
-        if (!messageUserSet.contains(username)) {
-            createCardForHistoryPanel(username);
+        if (!historyList.contains(username)) {
+            createCardForUser(username);
         }
 
-        ChatArea ca = new ChatArea();
-        ca.setMessagingUser(messagingUser);
-        ca.setName(username.trim());
+        if (!chatAreas.containsKey(username)) {
+            ChatArea ca = new ChatArea();
+            ca.findConversation(messagingUser);
+            ca.setName(username);
+            pnlMsg.getChatArea().add(ca, username);
+            chatAreas.put(username, ca);
+        }
 
-        pnlMsg.getChatArea().add(ca, ca.getName());
         cardLayout.show(pnlMsg.getChatArea(), username);
+    }
+
+    public void createGroupChatMessagePanel(String conversationID) {
+        if (!historyList.contains(new ObjectId(conversationID))) {
+            createCardForGroup(conversationID);
+        }
+
+        if (!chatAreas.containsKey(conversationID)) {
+            ChatArea ca = new ChatArea();
+            ca.setConversationID(conversationID);
+            ca.setName(conversationID);
+            pnlMsg.getChatArea().add(ca, conversationID);
+            chatAreas.put(conversationID, ca);
+        }
+
+        cardLayout.show(pnlMsg.getChatArea(), conversationID);
     }
 }

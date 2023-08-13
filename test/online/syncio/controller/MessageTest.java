@@ -6,10 +6,11 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import javax.swing.JPanel;
 import online.syncio.component.message.ChatBox;
-import online.syncio.dao.MessageDAO;
+import online.syncio.dao.ConversationDAO;
 import online.syncio.dao.MongoDBConnect;
 import online.syncio.model.Message;
 import online.syncio.view.login.Login;
@@ -18,6 +19,7 @@ import static org.assertj.swing.finder.WindowFinder.findFrame;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JPanelFixture;
 import static org.assertj.swing.timing.Pause.pause;
+import org.bson.types.ObjectId;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
@@ -26,7 +28,7 @@ import org.junit.Test;
 public class MessageTest {
 
     FrameFixture window;
-    MessageDAO msgDAO = MongoDBConnect.getMessageDAO();
+    ConversationDAO conversationDAO = MongoDBConnect.getConversationDAO();
 
     final String username = "thuanID";
     final String password = "1";
@@ -54,31 +56,50 @@ public class MessageTest {
 
         JPanel pnlHistoryUserList = mainWindow.panel("userList").target();
 
-        Set<String> messagedUserSet = msgDAO.getMessagingUsers(username);
+        List<Object> historyList = conversationDAO.findAllMessageHistory(username);
 
-        int userCount = messagedUserSet.toArray().length;
+        int userCount = historyList.size();
 
         int compCount = pnlHistoryUserList.getComponentCount();
 
         assertEquals(userCount, compCount);
 
-        for (String name : messagedUserSet) {
-            assertEquals(name, mainWindow.panel(name).target().getName());
+        for (Object stuff : historyList) {
+            String text = "";
+
+            if (stuff instanceof ObjectId id) {
+                text = id.toString();
+            }
+
+            if (stuff instanceof String username) {
+                text = username;
+            }
+            assertEquals(text, mainWindow.panel(text).target().getName());
         }
     }
 
     @Test
     public void shouldShowMessagedHistoryWithAUser() {
-        Set<String> messagedUserSet = msgDAO.getMessagingUsers(username);
-        Collections.shuffle(Arrays.asList(messagedUserSet));
+        List<Object> historyList = conversationDAO.findAllMessageHistory(username);
+        Collections.shuffle(Arrays.asList(historyList));
 
-        int userCount = messagedUserSet.toArray().length;
+        int userCount = historyList.toArray().length;
 
         if (userCount != 0) {
             FrameFixture mainWindow = findFrame("Main").withTimeout(10000).using(window.robot());
             JPanelFixture pnlChatArea = mainWindow.panel("chatArea");
 
-            String messagingUser = messagedUserSet.iterator().next();
+            Object obj = historyList.iterator().next();
+
+            String messagingUser = "";
+
+            if (obj instanceof ObjectId id) {
+                messagingUser = id.toString();
+            }
+
+            if (obj instanceof String username) {
+                messagingUser = username;
+            }
 
             mainWindow.panel("userList").panel(messagingUser).click();
 
@@ -87,7 +108,7 @@ public class MessageTest {
             pnlChatArea.requireVisible();
             pnlChatArea.panel(messagingUser).requireVisible();
 
-            FindIterable<Message> msgList = MongoDBConnect.getMessageDAO().findAllByTwoUsers(username, messagingUser);
+            FindIterable<Message> msgList = MongoDBConnect.getConversationDAO().findAllByTwoUsers(username, messagingUser);
 
             int messageCount = msgList.into(new ArrayList<>()).size();
 
@@ -109,16 +130,26 @@ public class MessageTest {
     public void shouldMessageBeSent() {
         FrameFixture mainWindow = findFrame("Main").withTimeout(10000).using(window.robot());
 
-        Set<String> messagedUserSet = msgDAO.getMessagingUsers(username);
+        List<Object> historyList = conversationDAO.findAllMessageHistory(username);
 
-        String messagingUser = messagedUserSet.iterator().next();
+        Object obj = historyList.iterator().next();
+
+        String messagingUser = "";
+
+        if (obj instanceof ObjectId id) {
+            messagingUser = id.toString();
+        }
+
+        if (obj instanceof String username) {
+            messagingUser = username;
+        }
 
         mainWindow.panel("userList").panel(messagingUser).click();
         pause(1000);
 
         String messageContent = "This is a message to see if it can be sent to MongoDB!!!";
         Message m = new Message(username, messagingUser, messageContent);
-        boolean messageSent = MongoDBConnect.getMessageDAO().add(m);
+        boolean messageSent = MongoDBConnect.getConversationDAO().add(m);
 
         assertEquals(true, messageSent);
     }
@@ -128,7 +159,7 @@ public class MessageTest {
         FrameFixture mainWindow = findFrame("Main").withTimeout(10000).using(window.robot());
         JPanelFixture pnlChatArea = mainWindow.panel("chatArea");
 
-        Set<String> messagedUserSet = msgDAO.getMessagingUsers(username);
+        Set<String> messagedUserSet = conversationDAO.findAllMessageHistory(username);
 
         String messagingUser = messagedUserSet.iterator().next();
 
@@ -169,7 +200,7 @@ public class MessageTest {
         FrameFixture mainWindow = findFrame("Main").withTimeout(10000).using(window.robot());
         JPanelFixture pnlChatArea = mainWindow.panel("chatArea");
 
-        Set<String> messagedUserSet = msgDAO.getMessagingUsers(username);
+        Set<String> messagedUserSet = conversationDAO.findAllMessageHistory(username);
 
         String messagingUser = messagedUserSet.iterator().next();
 
@@ -178,7 +209,7 @@ public class MessageTest {
 
         String messageContent = "This is a message to see if the logged in user has recieved this message!!!";
         Message testMessage = new Message(messagingUser, username, messageContent);
-        boolean messageSent = MongoDBConnect.getMessageDAO().add(testMessage);
+        boolean messageSent = MongoDBConnect.getConversationDAO().add(testMessage);
 
         assertEquals(true, messageSent);
         pause(3000);

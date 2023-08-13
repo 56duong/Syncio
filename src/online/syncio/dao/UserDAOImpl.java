@@ -14,7 +14,6 @@ import com.mongodb.client.result.UpdateResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import online.syncio.model.Post;
 import online.syncio.model.User;
 import online.syncio.model.UserIDAndDate;
 import online.syncio.utils.TextHelper;
@@ -24,11 +23,9 @@ import org.bson.types.ObjectId;
 
 public class UserDAOImpl implements UserDAO {
 
-    private MongoDatabase database;
     private MongoCollection<User> userCollection;
 
     public UserDAOImpl(MongoDatabase database) {
-        this.database = database;
         userCollection = database.getCollection("users", User.class);
     }
 
@@ -135,10 +132,6 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public FindIterable<User> getAllByUsernameOrEmailRoleFlag(boolean isReload, String usernameOrEmail, Integer role, Integer flag) {
-        if(isReload) {
-            userCollection = database.getCollection("users", User.class);
-        }
-        
         if (usernameOrEmail == null && role == null && flag == null) {
             return userCollection.find();
         }
@@ -168,7 +161,7 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public long countPost(String userID) {
-        return database.getCollection("posts", Post.class).countDocuments(Filters.eq("userID", userID));
+        return userCollection.countDocuments(Filters.eq("userID", userID));
     }
 
     @Override

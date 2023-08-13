@@ -1,44 +1,47 @@
 package online.syncio.model;
 
 import online.syncio.utils.TimeHelper;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class Message {
 
+    @BsonProperty("sender")
     private String sender;
-    private String recipient;
+
+    @BsonProperty("text")
+    private String text;
+
+    @BsonProperty("dateSent")
     private String dateSent = TimeHelper.getCurrentDateTime();
-    private String messageContent;
 
     public Message() {
     }
 
-    public Message(String sender, String recipient, String message) {
-        this.sender = sender.trim();
-        this.recipient = recipient.trim();
-        this.messageContent = message.trim();
+    public Message(String dateSent, String text, String sender) {
+        this.dateSent = dateSent;
+        this.text = text;
+        this.sender = sender;
     }
 
-    public Message(String sender, String recipient, String dateSent, String message) {
-        this.sender = sender.trim();
-        this.recipient = recipient.trim();
-        this.dateSent = dateSent;
-        this.messageContent = message.trim();
+    public Message(String sender, String text) {
+        this.sender = sender;
+        this.text = text;
     }
 
     public String getSender() {
-        return sender.trim();
+        return sender;
     }
 
     public void setSender(String sender) {
-        this.sender = sender.trim();
+        this.sender = sender;
     }
 
-    public String getRecipient() {
-        return recipient.trim();
+    public String getText() {
+        return text;
     }
 
-    public void setRecipient(String recipient) {
-        this.recipient = recipient.trim();
+    public void setText(String text) {
+        this.text = text;
     }
 
     public String getDateSent() {
@@ -49,21 +52,11 @@ public class Message {
         this.dateSent = dateSent;
     }
 
-    public String getMessage() {
-        return messageContent.trim();
-    }
-
-    public void setMessage(String message) {
-        this.messageContent = message.trim();
-    }
-
     @Override
     public String toString() {
-        return "Message{"
-                + ", sender=" + sender
-                + ", recipient=" + recipient
-                + ", dateSent=" + dateSent
-                + ", message=" + messageContent
-                + '}';
+        return """
+               \tMessage{
+               \t\tsender=""" + sender + "\n\t\t, text=" + text + "\n\t\t, dateSent=" + dateSent + "}\n\n";
     }
+
 }

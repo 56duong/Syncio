@@ -22,7 +22,7 @@ public class MongoDBConnect {
     private static MongoDatabase database;
     private static UserDAO userDAO;
     private static PostDAO postDAO;
-    private static MessageDAO messageDAO;
+    private static ConversationDAO conversationDAO;
 
     public static synchronized MongoDBConnect getInstance() {
         if (instance == null) {
@@ -56,7 +56,7 @@ public class MongoDBConnect {
             // Create UserDAO and PostDAO instances
             userDAO = new UserDAOImpl(database);
             postDAO = new PostDAOImpl(database);
-            messageDAO = new MessageDAOImpl(database);
+            conversationDAO = new ConversationDAOImpl(database);
         }
     }
 
@@ -81,11 +81,11 @@ public class MongoDBConnect {
         return postDAO;
     }
 
-    public static MessageDAO getMessageDAO() {
+    public static ConversationDAO getConversationDAO() {
         if (mongoClient == null) {
             connect();
         }
-        return messageDAO;
+        return conversationDAO;
     }
 
     public static void close() {

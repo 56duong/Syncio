@@ -18,7 +18,7 @@ import java.util.Properties;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import online.syncio.component.MyLabel;
-import online.syncio.component.SearchedUserCard;
+import online.syncio.component.SearchedCard;
 import online.syncio.dao.MongoDBConnect;
 import online.syncio.dao.PostDAO;
 import online.syncio.model.LoggedInUser;
@@ -136,11 +136,11 @@ public class NotificationController {
         return nums;
     }
 
-    private SearchedUserCard createNotificationCard(Post post, int newCommentsCount) {
+    private SearchedCard createNotificationCard(Post post, int newCommentsCount) {
         String notificationText = newCommentsCount + " new comments on your post";
         String notificationDate = post.getCommentList().get(0).getDate();
 
-        return new SearchedUserCard(post.getId().toString(), notificationText, notificationDate);
+        return new SearchedCard(post.getId().toString(), notificationText, notificationDate);
     }
 
 }

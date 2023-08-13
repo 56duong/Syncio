@@ -3,20 +3,41 @@ package online.syncio.model;
 import java.util.ArrayList;
 import java.util.Objects;
 import online.syncio.utils.TimeHelper;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 
 public class User {
 
+    @BsonId
     private ObjectId id;
+
+    @BsonProperty("username")
     private String username = "";
+
+    @BsonProperty("password")
     private String password = "";
+
+    @BsonProperty("email")
     private String email = "";
+
+    @BsonProperty("avt")
     public Binary avt;
+
+    @BsonProperty("bio")
     private String bio = "";
+
+    @BsonProperty("role")
     private int role;
+
+    @BsonProperty("dateCreated")
     private String dateCreated = TimeHelper.getCurrentDateTime();
+
+    @BsonProperty("flag")
     private int flag;
+
+    @BsonProperty("following")
     private ArrayList<UserIDAndDate> following = new ArrayList<>();
 
     public User() {
