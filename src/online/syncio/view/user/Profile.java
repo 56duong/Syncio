@@ -21,6 +21,7 @@ import online.syncio.model.User;
 import online.syncio.model.UserIDAndDate;
 import online.syncio.utils.ImageHelper;
 import online.syncio.utils.OtherHelper;
+import org.bson.types.Binary;
 
 public class Profile extends JPanel {
 
@@ -129,8 +130,8 @@ public class Profile extends JPanel {
 
             lblAvatar.setIcon(ImageHelper.toRoundImage(bufferedImage, lblAvatar.getWidth()));
 
-            LoggedInUser.getCurrentUser().setAvt(ImageHelper.bufferedImageToBinary(bufferedImage));
-
+            byte[] avtByte = ImageHelper.readAsByte(bufferedImage);
+            LoggedInUser.getCurrentUser().setAvt(new Binary(avtByte));
             userDAO.updateByID(LoggedInUser.getCurrentUser());
         }
     }
