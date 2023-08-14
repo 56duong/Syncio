@@ -173,7 +173,7 @@ public class SearchedCard extends javax.swing.JPanel {
         lblAvatar.setIcon(icon);
 
         List<String> participants = MongoDBConnect.getConversationDAO().getByID(conversationID).getParticipants();
-        participants.remove(LoggedInUser.getCurrentUser().getUsername());
+        participants.remove(LoggedInUser.getCurrentUserame());
 
         lblUsername.setText("Group chat siêu xịn");
         lblFollowers.setText(participants.toString());

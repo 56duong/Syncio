@@ -1,6 +1,5 @@
 package online.syncio.controller;
 
-import com.mongodb.client.FindIterable;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -108,7 +107,8 @@ public class MessageTest {
             pnlChatArea.requireVisible();
             pnlChatArea.panel(messagingUser).requireVisible();
 
-            FindIterable<Message> msgList = MongoDBConnect.getConversationDAO().findAllByTwoUsers(username, messagingUser);
+            String[] List<Message>
+            msgList = MongoDBConnect.getConversationDAO().findMessagedUser(messagingUser);
 
             int messageCount = msgList.into(new ArrayList<>()).size();
 

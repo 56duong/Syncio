@@ -77,14 +77,14 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public List<User> getAll() {
-        List<User> lUser = new ArrayList<>();
+        List<User> userList = new ArrayList<>();
         try {
-            userCollection.find().into(lUser);
+            userCollection.find().into(userList);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return lUser;
+        return userList;
     }
 
     @Override

@@ -45,7 +45,7 @@ public class ChatArea extends JPanel {
 
     private UserDAO userDAO = MongoDBConnect.getUserDAO();
     private ConversationDAO conversationDAO = MongoDBConnect.getConversationDAO();
-    Conversation conversationHistory;
+    private Conversation chatAreaConversation;
     private ObjectId conversationID;
     private User currentUser = LoggedInUser.getCurrentUser();
 
@@ -190,7 +190,6 @@ public class ChatArea extends JPanel {
 
                             addChatBox(newMessage, avatarImage, ChatBox.BoxType.LEFT);
                         }
-
                     });
                 }
             });
@@ -200,11 +199,11 @@ public class ChatArea extends JPanel {
     }
 
     public void getCoversation() {
-        if (conversationHistory == null) {
-            conversationHistory = conversationDAO.getByID(conversationID.toString());
+        if (chatAreaConversation == null) {
+            chatAreaConversation = conversationDAO.getByID(conversationID.toString());
         }
 
-        List<Message> messageList = conversationHistory.getMessagesHistory();
+        List<Message> messageList = chatAreaConversation.getMessagesHistory();
 
         if (!messageList.isEmpty()) {
             ImageIcon defaultAvatar = ImageHelper.resizing(ImageHelper.getDefaultImage(), 40, 40);
@@ -237,18 +236,32 @@ public class ChatArea extends JPanel {
             });
 
             thread.start();
+        } else {
+            SwingUtilities.invokeLater(() -> {
+                body.revalidate();
+                bottom.revalidate();
+            });
+            body.repaint();
+            body.revalidate();
+            scrollBody.revalidate();
         }
     }
 
-    public void findConversation(User user) {
+    public void findConversationWithOneUser(User user) throws NullPointerException {
         String[] usernames = new String[]{currentUser.getUsername(), user.getUsername()};
+        labelTitle.setText(usernames[1]);
 
-        conversationHistory = conversationDAO.findByParticipants(Arrays.asList(usernames));
-        setConversationID(conversationHistory.getId().toString());
+        chatAreaConversation = conversationDAO.findByParticipants(Arrays.asList(usernames));
+        setConversationID(chatAreaConversation.getId().toString());
     }
 
     public void setConversationID(String conversationID) {
         this.conversationID = new ObjectId(conversationID);
+
+        if (labelTitle.getText().isBlank()) {
+            labelTitle.setText("Group Chat");
+        }
+
         getCoversation();
     }
 

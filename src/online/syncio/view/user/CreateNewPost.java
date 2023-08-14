@@ -51,7 +51,7 @@ public class CreateNewPost extends javax.swing.JPanel {
         txtCaption.setPlaceholder("Write a caption...");
         btnSelectImage.requestFocus();
 
-        lblAccount.setText(LoggedInUser.getCurrentUser().getUsername());
+        lblAccount.setText(LoggedInUser.getCurrentUserame());
 
         imageSelected(false);
 

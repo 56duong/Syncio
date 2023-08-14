@@ -57,7 +57,7 @@ public class ConversationDAOImpl implements ConversationDAO {
     }
 
     @Override
-    public List<String> findMessageHistoryWithUser(String currentUser) {
+    public List<String> findMessagedUser(String currentUser) {
         Bson filter = Filters.in("participants", currentUser);
 
         List<String> history = new ArrayList<>();
@@ -79,9 +79,9 @@ public class ConversationDAOImpl implements ConversationDAO {
 
     @Override
     public ChangeStreamIterable<Conversation> getChangeStream() {
-        ChangeStreamIterable<Conversation> changeStreamPosts = conversationCollection.watch();
-        changeStreamPosts.fullDocument(FullDocument.UPDATE_LOOKUP);
-        return changeStreamPosts;
+        ChangeStreamIterable<Conversation> changeStreamConversations = conversationCollection.watch();
+        changeStreamConversations.fullDocument(FullDocument.UPDATE_LOOKUP);
+        return changeStreamConversations;
     }
 
     @Override

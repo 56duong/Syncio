@@ -1,10 +1,19 @@
 package online.syncio.model;
 
 public class LoggedInUser {
+
     private static User currentUser;
 
     public static User getCurrentUser() {
         return currentUser;
+    }
+
+    public static String getCurrentUserame() {
+        try {
+            return currentUser.getUsername();
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 
     public static void setCurrentUser(User user) {
@@ -18,11 +27,11 @@ public class LoggedInUser {
     public static boolean isUser() {
         return isLoggedIn() && currentUser.getRole() == 0;
     }
-    
+
     public static boolean isAdmin() {
         return isLoggedIn() && currentUser.getRole() == 1;
     }
-    
+
     public static void logOut() {
         currentUser = null;
     }

@@ -1,17 +1,22 @@
 package online.syncio.controller.user;
 
+import com.mongodb.client.ChangeStreamIterable;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.Box;
+import javax.swing.SwingUtilities;
 import online.syncio.component.SearchedCard;
 import online.syncio.component.message.ChatArea;
 import online.syncio.dao.ConversationDAO;
 import online.syncio.dao.MongoDBConnect;
 import online.syncio.dao.UserDAO;
+import online.syncio.model.Conversation;
 import online.syncio.model.LoggedInUser;
 import online.syncio.model.User;
 import online.syncio.view.user.MessagePanel;
@@ -44,18 +49,26 @@ public class MessageController {
     public void addUserToHistoryPanel() {
         pnlMsg.getPnlUserList().removeAll();
 
-        historyList = conversationDAO.findAllMessageHistory(LoggedInUser.getCurrentUser().getUsername());
+        historyList = conversationDAO.findAllMessageHistory(LoggedInUser.getCurrentUserame());
 
-        for (Object o : historyList) {
-            if (o instanceof ObjectId groupChat) {
-                createCardForGroup(groupChat.toString());
-            } else if (o instanceof String name) {
-                createCardForUser(name);
+        Thread thread = new Thread(() -> {
+            for (Object o : historyList) {
+                SwingUtilities.invokeLater(() -> {
+                    if (o instanceof ObjectId groupChat) {
+                        createCard(groupChat.toString(), null);
+                    } else if (o instanceof String name) {
+                        User user = userDAO.getByUsername(name);
+                        createCard(name, user);
+                    }
+                });
             }
-        }
 
-        pnlMsg.getPnlUserList().revalidate();
-        pnlMsg.getPnlUserList().repaint();
+            pnlMsg.getPnlUserList().revalidate();
+            pnlMsg.getPnlUserList().repaint();
+        });
+        thread.start();
+
+        getConversationChangeStream();
     }
 
     private void createCard(String identifier, User user) {
@@ -85,18 +98,6 @@ public class MessageController {
         pnlMsg.getPnlUserList().add(Box.createVerticalStrut(20));
     }
 
-    public void createCardForGroup(String conversationID) {
-        createCard(conversationID, null);  // Replace with actual user data
-    }
-
-    public void createCardForUser(String username) {
-        User user = userDAO.getByUsername(username);
-
-        if (user != null) {
-            createCard(username, user);
-        }
-    }
-
     public void openMessage(String textString) {
         Component chatArea = chatAreas.get(textString);
 
@@ -113,26 +114,39 @@ public class MessageController {
     }
 
     public void createUserMessagePanel(User messagingUser) {
-        String username = messagingUser.getUsername();
+        String messagingUsername = messagingUser.getUsername();
 
-        if (!historyList.contains(username)) {
-            createCardForUser(username);
+        if (!historyList.contains(messagingUsername)) {
+            User user = userDAO.getByUsername(messagingUsername);
+            createCard(messagingUsername, user);
+            historyList.add(messagingUsername);
         }
 
-        if (!chatAreas.containsKey(username)) {
+        if (!chatAreas.containsKey(messagingUsername)) {
             ChatArea ca = new ChatArea();
-            ca.findConversation(messagingUser);
-            ca.setName(username);
-            pnlMsg.getChatArea().add(ca, username);
-            chatAreas.put(username, ca);
+            try {
+                ca.findConversationWithOneUser(messagingUser);
+            } catch (NullPointerException e) {
+                String[] participants = new String[]{LoggedInUser.getCurrentUserame(), messagingUsername};
+                Conversation con = new Conversation(Arrays.asList(participants), new ArrayList<>());
+
+                conversationDAO.add(con);
+                ca.findConversationWithOneUser(messagingUser);
+            }
+
+            ca.setName(messagingUsername);
+
+            pnlMsg.getChatArea().add(ca, messagingUsername);
+            chatAreas.put(messagingUsername, ca);
         }
 
-        cardLayout.show(pnlMsg.getChatArea(), username);
+        cardLayout.show(pnlMsg.getChatArea(), messagingUsername);
     }
 
     public void createGroupChatMessagePanel(String conversationID) {
         if (!historyList.contains(new ObjectId(conversationID))) {
-            createCardForGroup(conversationID);
+            createCard(conversationID, null);
+            historyList.add(new ObjectId(conversationID));
         }
 
         if (!chatAreas.containsKey(conversationID)) {
@@ -140,9 +154,43 @@ public class MessageController {
             ca.setConversationID(conversationID);
             ca.setName(conversationID);
             pnlMsg.getChatArea().add(ca, conversationID);
+
             chatAreas.put(conversationID, ca);
         }
 
         cardLayout.show(pnlMsg.getChatArea(), conversationID);
+    }
+
+    // Dùng để update giao diện, kiểm tra người dùng này có được người mới nhăn tin
+    // hoặc được mời vào group chat
+    public void getConversationChangeStream() {
+        ChangeStreamIterable<Conversation> changeStream = conversationDAO.getChangeStream();
+
+        Thread changeStreamThread = new Thread(() -> {
+            changeStream.forEach(changeDocument -> {
+                Conversation conversation = changeDocument.getFullDocument();
+
+                List<String> participants = conversation.getParticipants();
+
+                if (participants.contains(LoggedInUser.getCurrentUserame())) {
+                    if (participants.size() == 2
+                            && !historyList.contains(participants.get(1))) {
+                        String messeagingUsernam = participants.get(1);
+                        User user = userDAO.getByUsername(messeagingUsernam);
+                        createUserMessagePanel(user);
+                    }
+
+                    if (participants.size() >= 3
+                            && !historyList.contains(conversation.getId())) {
+                        createGroupChatMessagePanel(conversation.getId().toString());
+                    }
+                }
+
+                pnlMsg.getPnlUserList().revalidate();
+                pnlMsg.getPnlUserList().repaint();
+            });
+        });
+
+        changeStreamThread.start();
     }
 }

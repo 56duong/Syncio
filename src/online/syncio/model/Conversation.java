@@ -61,6 +61,9 @@ public class Conversation {
     }
 
     public Message getNewestMessage() {
+        if (messagesHistory.isEmpty()) {
+            return null;
+        }
         return messagesHistory.get(messagesHistory.size() - 1);
     }
 
@@ -68,5 +71,4 @@ public class Conversation {
     public String toString() {
         return "Conversation{" + "id=" + id + "\n\nparticipants=" + participants + "\n\nmessagesHistory=" + messagesHistory + '}';
     }
-
 }

@@ -4,7 +4,6 @@ import com.mongodb.client.FindIterable;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import javax.swing.Box;
 import online.syncio.component.SearchedCard;
 import online.syncio.dao.MongoDBConnect;
 import online.syncio.dao.UserDAO;
@@ -40,7 +39,6 @@ public class SearchController {
 
     private void loadResult() {
         this.pnlSearch.getPnlResult().removeAll();
-        Box.createVerticalStrut(20);
 
         MouseListener mouseEvent = new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -57,7 +55,6 @@ public class SearchController {
             card.addMouseListener(mouseEvent);
 
             this.pnlSearch.getPnlResult().add(card);
-            Box.createVerticalStrut(20);
 
             this.pnlSearch.getPnlResult().revalidate();
             this.pnlSearch.getPnlResult().repaint();

@@ -1,6 +1,5 @@
 package online.syncio.view.admin;
 
-import online.syncio.view.user.PostUI;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
 import java.awt.Color;
@@ -21,6 +20,7 @@ import online.syncio.model.UserIDAndDate;
 import online.syncio.utils.SendEmail;
 import online.syncio.utils.TextHelper;
 import online.syncio.utils.Validator;
+import online.syncio.view.user.PostUI;
 
 public class UserDetail extends javax.swing.JFrame {
 
@@ -510,7 +510,7 @@ public class UserDetail extends javax.swing.JFrame {
                     + "Dear " + recipientName + ",<br>\n"
                     + "Thank you for creating your personal account on SYNCIO.<br>\n"
                     + "<br><br>\n"
-                    + "An account has been created for you in Syncio by \n" + LoggedInUser.getCurrentUser().getUsername() + ".\n"
+                    + "An account has been created for you in Syncio by \n" + LoggedInUser.getCurrentUserame() + ".\n"
                     + "<br><br>\n"
                     + "</td>\n"
                     + "</tr>\n"
@@ -562,7 +562,6 @@ public class UserDetail extends javax.swing.JFrame {
 //        java.awt.EventQueue.invokeLater(() -> {
 //            new ManagementUserDetail().setVisible(true);
 //        });
-
 //        java.awt.EventQueue.invokeLater(() -> {
 //            new UserDetail().setVisible(true);
 //        });

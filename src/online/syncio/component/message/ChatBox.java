@@ -64,7 +64,7 @@ public class ChatBox extends JComponent {
         senderAvatar.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (message.getSender().trim().equalsIgnoreCase(LoggedInUser.getCurrentUser().getUsername().trim())) {
+                if (message.getSender().trim().equalsIgnoreCase(LoggedInUser.getCurrentUserame().trim())) {
                     Main.getInstance().getBtnProfile().doClick();
                 } else {
                     User user = MongoDBConnect.getUserDAO().getByUsername(message.getSender().trim());

@@ -12,7 +12,7 @@ public interface ConversationDAO extends DAO<Conversation> {
 
     public List<Object> findAllMessageHistory(String currentUser);
 
-    public List<String> findMessageHistoryWithUser(String currentUser);
+    public List<String> findMessagedUser(String currentUser);
 
     public ChangeStreamIterable<Conversation> getChangeStream();
 
