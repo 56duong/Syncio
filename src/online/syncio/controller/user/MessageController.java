@@ -173,14 +173,16 @@ public class MessageController {
                 List<String> participants = conversation.getParticipants();
 
                 if (participants.contains(LoggedInUser.getCurrentUserame())) {
-                    if (participants.size() == 2
-                            && !historyList.contains(participants.get(1))) {
-                        String messeagingUsernam = participants.get(1);
+                    participants.remove(LoggedInUser.getCurrentUserame());
+
+                    if (participants.size() == 1
+                            && !historyList.contains(participants.get(0))) {
+                        String messeagingUsernam = participants.get(0);
                         User user = userDAO.getByUsername(messeagingUsernam);
                         createUserMessagePanel(user);
                     }
 
-                    if (participants.size() >= 3
+                    if (participants.size() >= 2
                             && !historyList.contains(conversation.getId())) {
                         createGroupChatMessagePanel(conversation.getId().toString());
                     }
