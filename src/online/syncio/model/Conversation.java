@@ -60,6 +60,10 @@ public class Conversation {
         this.messagesHistory = messagesHistory;
     }
 
+    public void addNewMessage(Message msg) {
+        this.messagesHistory.add(msg);
+    }
+
     public Message getNewestMessage() {
         if (messagesHistory.isEmpty()) {
             return null;

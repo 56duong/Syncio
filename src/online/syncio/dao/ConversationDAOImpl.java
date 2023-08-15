@@ -28,13 +28,13 @@ public class ConversationDAOImpl implements ConversationDAO {
     }
 
     @Override
-    public Conversation findByParticipants(List<String> participants) {
+    public Conversation getByParticipants(List<String> participants) {
         Bson filter = Filters.all("participants", participants);
         return conversationCollection.find(filter).first();
     }
 
     @Override
-    public List<Object> findAllMessageHistory(String currentUser) {
+    public List<Object> getAllMessageHistory(String currentUser) {
         Bson filter = Filters.in("participants", currentUser);
 
         List<Object> history = new ArrayList<>();
@@ -57,7 +57,7 @@ public class ConversationDAOImpl implements ConversationDAO {
     }
 
     @Override
-    public List<String> findMessagedUser(String currentUser) {
+    public List<String> getMessagedUser(String currentUser) {
         Bson filter = Filters.in("participants", currentUser);
 
         List<String> history = new ArrayList<>();

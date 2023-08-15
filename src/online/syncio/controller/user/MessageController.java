@@ -49,7 +49,7 @@ public class MessageController {
     public void addUserToHistoryPanel() {
         pnlMsg.getPnlUserList().removeAll();
 
-        historyList = conversationDAO.findAllMessageHistory(LoggedInUser.getCurrentUserame());
+        historyList = conversationDAO.getAllMessageHistory(LoggedInUser.getCurrentUserame());
 
         Thread thread = new Thread(() -> {
             for (Object o : historyList) {

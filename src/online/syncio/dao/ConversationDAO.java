@@ -8,11 +8,11 @@ import org.bson.types.ObjectId;
 
 public interface ConversationDAO extends DAO<Conversation> {
 
-    public Conversation findByParticipants(List<String> participants);
+    public Conversation getByParticipants(List<String> participants);
 
-    public List<Object> findAllMessageHistory(String currentUser);
+    public List<Object> getAllMessageHistory(String currentUser);
 
-    public List<String> findMessagedUser(String currentUser);
+    public List<String> getMessagedUser(String currentUser);
 
     public ChangeStreamIterable<Conversation> getChangeStream();
 

@@ -10,7 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Date;
 import javax.swing.BorderFactory;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import online.syncio.component.GlassPanePopup;
 import online.syncio.component.MyButton;
@@ -47,9 +46,9 @@ public final class Main extends javax.swing.JFrame {
         setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 20, 20)); //rounded frame
         setLocationRelativeTo(null);
         GlassPanePopup.install(this);
-        
+
         pnlSearch.setVisible(false);
-        if(!controller.getIsUpdating()) {
+        if (!controller.getIsUpdating()) {
             pnlNotifications = new NotificationsPanel();
             pnlNotifications.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 540));
             pnlNotifications.setAlignmentX(1.0F);
@@ -116,7 +115,6 @@ public final class Main extends javax.swing.JFrame {
 
                     showTab(name1, btn1);
                 }
-
             });
         }
     }
@@ -355,7 +353,7 @@ public final class Main extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        if(!controller.getIsUpdating()) {
+        if (!controller.getIsUpdating()) {
             addComponents();
             btnHome.doClick();
             if (LoggedInUser.getCurrentUser() != null) {
@@ -363,12 +361,11 @@ public final class Main extends javax.swing.JFrame {
                 pnlNotifications.revalidate();
                 pnlNotifications.repaint();
             }
-        }
-        else {
+        } else {
             // update
             getPnlTitleBar().getBtnClose().setVisible(false);
         }
-        
+
         //check update
         controller.checkForUpdates();
     }//GEN-LAST:event_formWindowOpened
@@ -498,8 +495,6 @@ public final class Main extends javax.swing.JFrame {
     public WindowTitleBar getPnlTitleBar() {
         return pnlTitleBar;
     }
-    
-    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private online.syncio.component.MyButton btnCreate;

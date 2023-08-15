@@ -251,7 +251,7 @@ public class ChatArea extends JPanel {
         String[] usernames = new String[]{currentUser.getUsername(), user.getUsername()};
         labelTitle.setText(usernames[1]);
 
-        chatAreaConversation = conversationDAO.findByParticipants(Arrays.asList(usernames));
+        chatAreaConversation = conversationDAO.getByParticipants(Arrays.asList(usernames));
         setConversationID(chatAreaConversation.getId().toString());
     }
 

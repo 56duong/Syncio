@@ -80,7 +80,9 @@ public class PostUI extends javax.swing.JPanel implements Options.ReasonSelected
     }
 
     private void showInfoPost() {
-        if(LoggedInUser.getCurrentUser() != null) loadReport();
+        if (LoggedInUser.getCurrentUser() != null) {
+            loadReport();
+        }
         String username = userDAO.getByID(userID).getUsername();
         lblUsername.setText(username);
         lblUsername2.setText(username);
@@ -466,8 +468,6 @@ public class PostUI extends javax.swing.JPanel implements Options.ReasonSelected
     public MyLabel getLblReport() {
         return lblReport;
     }
-    
-    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private online.syncio.component.MyButton btnNext;
