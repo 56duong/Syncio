@@ -20,7 +20,6 @@ import online.syncio.model.Conversation;
 import online.syncio.model.LoggedInUser;
 import online.syncio.model.User;
 import online.syncio.view.user.MessagePanel;
-import org.bson.types.ObjectId;
 
 public class MessageController {
 
@@ -29,7 +28,7 @@ public class MessageController {
 
     private UserDAO userDAO = MongoDBConnect.getUserDAO();
     private ConversationDAO conversationDAO = MongoDBConnect.getConversationDAO();
-    private List<Object> historyList;
+    private List<String> historyList = new ArrayList<>();
 
     private HashMap<String, Component> chatAreas = new HashMap<>();
 
@@ -49,16 +48,26 @@ public class MessageController {
     public void addUserToHistoryPanel() {
         pnlMsg.getPnlUserList().removeAll();
 
-        historyList = conversationDAO.getAllMessageHistory(LoggedInUser.getCurrentUserame());
+        if (!historyList.isEmpty()) {
+            historyList.clear();
+        }
+
+        historyList = conversationDAO.getAllMessageHistory(LoggedInUser.getCurrentUser().getIdAsString());
 
         Thread thread = new Thread(() -> {
-            for (Object o : historyList) {
+            for (String str : historyList) {
+                Conversation con = conversationDAO.getByID(str);
+                List<String> participants = con.getParticipants();
+                participants.remove(LoggedInUser.getCurrentUser().getIdAsString());
+
                 SwingUtilities.invokeLater(() -> {
-                    if (o instanceof ObjectId groupChat) {
-                        createCard(groupChat.toString(), null);
-                    } else if (o instanceof String name) {
-                        User user = userDAO.getByUsername(name);
-                        createCard(name, user);
+                    if (participants.size() == 1) {
+                        User user = userDAO.getByID(participants.get(0));
+                        createCard(str, user);
+                    }
+
+                    if (participants.size() >= 2) {
+                        createCard(str, null);
                     }
                 });
             }
@@ -69,84 +78,70 @@ public class MessageController {
         thread.start();
 
         getConversationChangeStream();
+        getUsersChangeStream();
     }
 
     private void createCard(String identifier, User user) {
         SearchedCard card = new SearchedCard();
 
-        if (user != null) {
-            card.setUser(user);
-            card.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    openMessage(card.getUser().getUsername());
-                }
-            });
+        if (user == null) {
+            card.setConversationID(identifier, null);
         } else {
-            card.setConversationID(identifier);
-            card.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    openMessage(card.getConversationID());
-                }
-            });
+            card.setConversationID(identifier, user);
         }
 
         card.setName(identifier);
+
+        card.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                openMessage(card.getConversationID());
+            }
+        });
 
         pnlMsg.getPnlUserList().add(card);
         pnlMsg.getPnlUserList().add(Box.createVerticalStrut(20));
     }
 
-    public void openMessage(String textString) {
-        Component chatArea = chatAreas.get(textString);
+    public void openMessageFromProfie(String userID) {
+        User user = userDAO.getByID(userID);
+
+        String[] testParticipants = new String[]{LoggedInUser.getCurrentUser().getIdAsString(), user.getIdAsString()};
+
+        Conversation con = conversationDAO.getByParticipants(Arrays.asList(testParticipants));
+
+        if (con == null) {
+            con = new Conversation(Arrays.asList(testParticipants), new ArrayList<>());
+            conversationDAO.add(con);
+        }
+    }
+
+    public void openMessage(String conversationID) {
+        Component chatArea = chatAreas.get(conversationID);
 
         if (chatArea == null) {
-            User messagingUser = userDAO.getByUsername(textString);
-            if (messagingUser != null) {
-                createUserMessagePanel(messagingUser);
-            } else {
-                createGroupChatMessagePanel(textString);
-            }
+            createChatArea(conversationID);
         } else {
-            cardLayout.show(pnlMsg.getChatArea(), textString);
+            cardLayout.show(pnlMsg.getChatArea(), conversationID);
         }
     }
 
-    public void createUserMessagePanel(User messagingUser) {
-        String messagingUsername = messagingUser.getUsername();
+    public void createChatArea(String conversationID) {
+        if (!historyList.contains(conversationID)) {
+            Conversation con = conversationDAO.getByID(conversationID);
+            List<String> participants = con.getParticipants();
+            participants.remove(LoggedInUser.getCurrentUser().getIdAsString());
 
-        if (!historyList.contains(messagingUsername)) {
-            User user = userDAO.getByUsername(messagingUsername);
-            createCard(messagingUsername, user);
-            historyList.add(messagingUsername);
-        }
-
-        if (!chatAreas.containsKey(messagingUsername)) {
-            ChatArea ca = new ChatArea();
-            try {
-                ca.findConversationWithOneUser(messagingUser);
-            } catch (NullPointerException e) {
-                String[] participants = new String[]{LoggedInUser.getCurrentUserame(), messagingUsername};
-                Conversation con = new Conversation(Arrays.asList(participants), new ArrayList<>());
-
-                conversationDAO.add(con);
-                ca.findConversationWithOneUser(messagingUser);
+            if (participants.size() == 1) {
+                User user = userDAO.getByID(participants.get(0));
+                createCard(conversationID, user);
             }
 
-            ca.setName(messagingUsername);
+            if (participants.size() >= 2) {
+                createCard(conversationID, null);
+            }
 
-            pnlMsg.getChatArea().add(ca, messagingUsername);
-            chatAreas.put(messagingUsername, ca);
-        }
-
-        cardLayout.show(pnlMsg.getChatArea(), messagingUsername);
-    }
-
-    public void createGroupChatMessagePanel(String conversationID) {
-        if (!historyList.contains(new ObjectId(conversationID))) {
-            createCard(conversationID, null);
-            historyList.add(new ObjectId(conversationID));
+            historyList.add(conversationID);
         }
 
         if (!chatAreas.containsKey(conversationID)) {
@@ -156,6 +151,8 @@ public class MessageController {
             pnlMsg.getChatArea().add(ca, conversationID);
 
             chatAreas.put(conversationID, ca);
+
+            System.out.println(ca.getName());
         }
 
         cardLayout.show(pnlMsg.getChatArea(), conversationID);
@@ -172,25 +169,40 @@ public class MessageController {
 
                 List<String> participants = conversation.getParticipants();
 
-                if (participants.contains(LoggedInUser.getCurrentUserame())) {
-                    participants.remove(LoggedInUser.getCurrentUserame());
-
-                    if (participants.size() == 1
-                            && !historyList.contains(participants.get(0))) {
-                        String messeagingUsernam = participants.get(0);
-                        User user = userDAO.getByUsername(messeagingUsernam);
-                        createUserMessagePanel(user);
-                    }
-
-                    if (participants.size() >= 2
-                            && !historyList.contains(conversation.getId())) {
-                        createGroupChatMessagePanel(conversation.getId().toString());
-                    }
+                if (participants.contains(LoggedInUser.getCurrentUser().getIdAsString())) {
+                    createChatArea(conversation.getIdAsString());
                 }
 
                 pnlMsg.getPnlUserList().revalidate();
                 pnlMsg.getPnlUserList().repaint();
             });
+        });
+
+        changeStreamThread.start();
+    }
+
+    // Dùng để update giao diện, kiểm tra người dùng có thay đổi thông tin cá nhân
+    public void getUsersChangeStream() {
+        ChangeStreamIterable<User> changeStream = userDAO.getChangeStream();
+
+        Thread changeStreamThread = new Thread(() -> {
+            changeStream.forEach(changeDocument -> {
+                User user = changeDocument.getFullDocument();
+
+                if (user != null) {
+
+                    String[] testParticipants = new String[]{LoggedInUser.getCurrentUser().getIdAsString(), user.getIdAsString()};
+
+                    Conversation con = conversationDAO.getByParticipants(Arrays.asList(testParticipants));
+
+                    if (con != null) {
+                        addUserToHistoryPanel();
+                    }
+
+                }
+            });
+            pnlMsg.getPnlUserList().revalidate();
+            pnlMsg.getPnlUserList().repaint();
         });
 
         changeStreamThread.start();

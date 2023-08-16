@@ -26,13 +26,23 @@ public class UserSelectionPanel extends javax.swing.JPanel {
     public UserSelectionPanel() {
         initComponents();
         this.userList = userDAO.getAll();
-        this.userList.remove(LoggedInUser.getCurrentUser());
+
+        int me = 0;
+
+        for (User user : userList) {
+            if (user.getIdAsString().equalsIgnoreCase(LoggedInUser.getCurrentUser().getIdAsString())) {
+                me = userList.indexOf(user);
+                break;
+            }
+        }
+
+        this.userList.remove(me);
 
         pnlResult.setLayout(new BoxLayout(pnlResult, BoxLayout.Y_AXIS));
         btnCreate.setEnabled(false);
         btnCreate.setBackground(new Color(219, 219, 219));
 
-        selectedUsernameList.add(LoggedInUser.getCurrentUserame());
+        selectedUsernameList.remove(LoggedInUser.getCurrentUser().getIdAsString());
 
         loadAllUser();
     }
@@ -42,18 +52,18 @@ public class UserSelectionPanel extends javax.swing.JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 SearchedCard card = (SearchedCard) e.getSource();
-                String username = card.getUser().getUsername();
+                String userID = card.getUser().getIdAsString();
 
                 Color background = card.getBackground();
 
                 if (background.equals(new Color(219, 219, 219))) {
                     card.setBackground(new Color(255, 255, 255));
                     selectedUsers--;
-                    selectedUsernameList.remove(username);
+                    selectedUsernameList.remove(userID);
                 } else {
                     card.setBackground(new Color(219, 219, 219));
                     selectedUsers++;
-                    selectedUsernameList.add(username);
+                    selectedUsernameList.add(userID);
                 }
 
                 if (selectedUsers >= 2) {

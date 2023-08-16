@@ -10,7 +10,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javaswingdev.FontAwesome;
 import javaswingdev.FontAwesomeIcon;
@@ -111,7 +110,7 @@ public class ChatArea extends JPanel {
             @Override
             public void mousePressedSendButton(ActionEvent evt) {
                 if (!getText().isBlank()) {
-                    Message m = new Message(currentUser.getUsername(), getText());
+                    Message m = new Message(currentUser.getIdAsString(), getText());
 
                     conversationDAO.addMessage(conversationID, m);
 
@@ -144,7 +143,7 @@ public class ChatArea extends JPanel {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                     if (!getText().isBlank()) {
-                        Message m = new Message(currentUser.getUsername(), getText());
+                        Message m = new Message(currentUser.getIdAsString(), getText());
 
                         conversationDAO.addMessage(conversationID, m);
 
@@ -176,8 +175,8 @@ public class ChatArea extends JPanel {
                     SwingUtilities.invokeLater(() -> {
                         Message newMessage = conversation.getNewestMessage();
 
-                        if (!newMessage.getSender().equalsIgnoreCase(currentUser.getUsername())) {
-                            User messagingUser = userDAO.getByUsername(newMessage.getSender());
+                        if (!newMessage.getSenderID().equalsIgnoreCase(currentUser.getIdAsString())) {
+                            User messagingUser = userDAO.getByID(newMessage.getSenderID());
                             Binary avt = messagingUser.getAvt();
                             ImageIcon avatarImage;
 
@@ -199,9 +198,6 @@ public class ChatArea extends JPanel {
     }
 
     public void getCoversation() {
-        if (chatAreaConversation == null) {
-            chatAreaConversation = conversationDAO.getByID(conversationID.toString());
-        }
 
         List<Message> messageList = chatAreaConversation.getMessagesHistory();
 
@@ -209,15 +205,15 @@ public class ChatArea extends JPanel {
             ImageIcon defaultAvatar = ImageHelper.resizing(ImageHelper.getDefaultImage(), 40, 40);
             Thread thread = new Thread(() -> {
                 for (Message m : messageList) {
-                    String senderUsername = m.getSender();
-                    boolean isCurrentUser = senderUsername.equalsIgnoreCase(currentUser.getUsername());
+                    String senderID = m.getSenderID();
+                    boolean isCurrentUser = senderID.equalsIgnoreCase(currentUser.getIdAsString());
 
                     Binary avt;
 
                     if (isCurrentUser) {
                         avt = currentUser.getAvt();
                     } else {
-                        User messagingUser = userDAO.getByUsername(senderUsername);
+                        User messagingUser = userDAO.getByID(senderID);
                         avt = messagingUser.getAvt();
                     }
 
@@ -247,18 +243,23 @@ public class ChatArea extends JPanel {
         }
     }
 
-    public void findConversationWithOneUser(User user) throws NullPointerException {
-        String[] usernames = new String[]{currentUser.getUsername(), user.getUsername()};
-        labelTitle.setText(usernames[1]);
-
-        chatAreaConversation = conversationDAO.getByParticipants(Arrays.asList(usernames));
-        setConversationID(chatAreaConversation.getId().toString());
-    }
-
     public void setConversationID(String conversationID) {
         this.conversationID = new ObjectId(conversationID);
 
-        if (labelTitle.getText().isBlank()) {
+        if (chatAreaConversation == null) {
+            chatAreaConversation = conversationDAO.getByID(conversationID.toString());
+        }
+
+        List<String> participants = chatAreaConversation.getParticipants();
+        participants.remove(LoggedInUser.getCurrentUser().getIdAsString());
+
+        if (participants.size() == 1) {
+            User user = userDAO.getByID(participants.get(0));
+            labelTitle.setText(user.getUsername());
+
+        }
+
+        if (participants.size() >= 2) {
             labelTitle.setText("Group Chat");
         }
 

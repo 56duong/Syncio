@@ -10,9 +10,7 @@ import online.syncio.dao.UserDAO;
 import online.syncio.model.LoggedInUser;
 import online.syncio.model.User;
 import online.syncio.utils.ImageHelper;
-import online.syncio.utils.OtherHelper;
 import online.syncio.utils.Validator;
-import online.syncio.view.login.Login;
 
 public final class EditProfile extends JPanel {
 
@@ -22,7 +20,9 @@ public final class EditProfile extends JPanel {
     public EditProfile() {
         initComponents();
         setBackground(new Color(0f, 0f, 0f, 0f));
-        if(LoggedInUser.getCurrentUser() != null) loadUserData();
+        if (LoggedInUser.getCurrentUser() != null) {
+            loadUserData();
+        }
     }
 
     public void loadUserData() {
@@ -243,11 +243,13 @@ public final class EditProfile extends JPanel {
                 GlassPanePopup.showPopup(new MyDialog("Username Already Taken", "The username you've chosen is already taken.\nPlease select a different username."), "dialog");
                 return;
             }
-            
+
             int result = userDAO.updateUsernameByEmail(username, txtEmail.getText());
             if (result <= 0) {
                 GlassPanePopup.showPopup(new MyDialog("Error", "An error occurs when updating your Username"), "dialog");
             } else {
+                User user = userDAO.getByUsername(username);
+                Main.getInstance().profile.loadOwnProfile(user);
                 GlassPanePopup.showPopup(new MyDialog("Update Successful", "Updated successfully. Reopen the app to see the change."), "dialog");
             }
         }

@@ -5,8 +5,8 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class Message {
 
-    @BsonProperty("sender")
-    private String sender;
+    @BsonProperty("senderID")
+    private String senderID;
 
     @BsonProperty("text")
     private String text;
@@ -17,23 +17,23 @@ public class Message {
     public Message() {
     }
 
-    public Message(String dateSent, String text, String sender) {
+    public Message(String dateSent, String text, String senderID) {
         this.dateSent = dateSent;
         this.text = text;
-        this.sender = sender;
+        this.senderID = senderID;
     }
 
-    public Message(String sender, String text) {
-        this.sender = sender;
+    public Message(String senderID, String text) {
+        this.senderID = senderID;
         this.text = text;
     }
 
-    public String getSender() {
-        return sender;
+    public String getSenderID() {
+        return senderID;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setSenderID(String senderID) {
+        this.senderID = senderID;
     }
 
     public String getText() {
@@ -56,7 +56,7 @@ public class Message {
     public String toString() {
         return """
                \tMessage{
-               \t\tsender=""" + sender + "\n\t\t, text=" + text + "\n\t\t, dateSent=" + dateSent + "}\n\n";
+               \t\tsenderID=""" + senderID + "\n\t\t, text=" + text + "\n\t\t, dateSent=" + dateSent + "}\n\n";
     }
 
 }

@@ -10,7 +10,7 @@ public interface ConversationDAO extends DAO<Conversation> {
 
     public Conversation getByParticipants(List<String> participants);
 
-    public List<Object> getAllMessageHistory(String currentUser);
+    public List<String> getAllMessageHistory(String currentUser);
 
     public List<String> getMessagedUser(String currentUser);
 

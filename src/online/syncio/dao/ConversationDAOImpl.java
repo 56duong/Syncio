@@ -13,6 +13,7 @@ import com.mongodb.client.model.changestream.FullDocument;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import online.syncio.model.Conversation;
 import online.syncio.model.Message;
@@ -29,35 +30,16 @@ public class ConversationDAOImpl implements ConversationDAO {
 
     @Override
     public Conversation getByParticipants(List<String> participants) {
-        Bson filter = Filters.all("participants", participants);
+        Bson filter1 = Filters.eq("participants", participants);
+        Collections.reverse(participants);
+        Bson filter2 = Filters.eq("participants", participants);
+
+        Bson filter = Filters.or(filter1, filter2);
         return conversationCollection.find(filter).first();
     }
 
     @Override
-    public List<Object> getAllMessageHistory(String currentUser) {
-        Bson filter = Filters.in("participants", currentUser);
-
-        List<Object> history = new ArrayList<>();
-
-        try (MongoCursor<Conversation> cursor = conversationCollection.find(filter).iterator()) {
-            while (cursor.hasNext()) {
-                Conversation con = cursor.next();
-                List<String> username = con.getParticipants();
-                username.remove(currentUser);
-
-                if (username.size() > 1) {
-                    history.add(con.getId());
-                } else {
-                    history.add(username.get(0));
-                }
-            }
-        }
-
-        return history;
-    }
-
-    @Override
-    public List<String> getMessagedUser(String currentUser) {
+    public List<String> getAllMessageHistory(String currentUser) {
         Bson filter = Filters.in("participants", currentUser);
 
         List<String> history = new ArrayList<>();
@@ -65,8 +47,24 @@ public class ConversationDAOImpl implements ConversationDAO {
         try (MongoCursor<Conversation> cursor = conversationCollection.find(filter).iterator()) {
             while (cursor.hasNext()) {
                 Conversation con = cursor.next();
+                history.add(con.getIdAsString());
+            }
+        }
+
+        return history;
+    }
+
+    @Override
+    public List<String> getMessagedUser(String currentUserID) {
+        Bson filter = Filters.in("participants", currentUserID);
+
+        List<String> history = new ArrayList<>();
+
+        try (MongoCursor<Conversation> cursor = conversationCollection.find(filter).iterator()) {
+            while (cursor.hasNext()) {
+                Conversation con = cursor.next();
                 List<String> username = con.getParticipants();
-                username.remove(currentUser);
+                username.remove(currentUserID);
 
                 if (username.size() == 1) {
                     history.add(username.get(0));

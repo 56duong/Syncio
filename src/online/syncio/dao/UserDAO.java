@@ -1,5 +1,6 @@
 package online.syncio.dao;
 
+import com.mongodb.client.ChangeStreamIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import online.syncio.model.User;
@@ -31,4 +32,7 @@ public interface UserDAO extends DAO<User> {
     public int getFollowerCount(String userId);
 
     public User getByUsername(String username);
+
+    public ChangeStreamIterable<User> getChangeStream();
+
 }

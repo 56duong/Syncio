@@ -3,6 +3,7 @@ package online.syncio.component;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
 import online.syncio.dao.MongoDBConnect;
@@ -153,30 +154,37 @@ public class SearchedCard extends javax.swing.JPanel {
         return user;
     }
 
-    public void setUser(User user) {
-        this.user = user;
-        ImageHelper.setAvatarToLabel(user, lblAvatar, 60);
-
-        lblUsername.setText(user.getUsername());
-        lblFollowers.setText(userDAO.getFollowerCount(user.getId().toString()) + " followers");
-    }
-
     public String getConversationID() {
         return conversationID;
     }
 
-    public void setConversationID(String conversationID) {
+    public void setConversationID(String conversationID, User user) {
         this.conversationID = conversationID;
+        this.user = user;
 
-        Image groupChatImage = new javax.swing.ImageIcon(getClass().getResource("/online/syncio/resources/images/icons/group-chat-60px.png")).getImage();
-        ImageIcon icon = ImageHelper.resizing(groupChatImage, 60, 60);
-        lblAvatar.setIcon(icon);
+        if (user == null) {
+            Image groupChatImage = new javax.swing.ImageIcon(getClass().getResource("/online/syncio/resources/images/icons/group-chat-60px.png")).getImage();
+            ImageIcon icon = ImageHelper.resizing(groupChatImage, 60, 60);
+            lblAvatar.setIcon(icon);
 
-        List<String> participants = MongoDBConnect.getConversationDAO().getByID(conversationID).getParticipants();
-        participants.remove(LoggedInUser.getCurrentUserame());
+            List<String> participants = MongoDBConnect.getConversationDAO().getByID(conversationID).getParticipants();
+            participants.remove(LoggedInUser.getCurrentUser().getIdAsString());
 
-        lblUsername.setText("Group chat siêu xịn");
-        lblFollowers.setText(participants.toString());
+            lblUsername.setText("Group chat siêu xịn");
+
+            List<String> usernameList = new ArrayList<>();
+
+            for (String id : participants) {
+                usernameList.add(userDAO.getByID(id).getUsername());
+            }
+
+            lblFollowers.setText(usernameList.toString());
+        } else {
+            ImageHelper.setAvatarToLabel(user, lblAvatar, 60);
+
+            lblUsername.setText(user.getUsername());
+            lblFollowers.setText(userDAO.getFollowerCount(user.getId().toString()) + " followers");
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

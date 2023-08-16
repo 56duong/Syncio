@@ -40,6 +40,10 @@ public class Conversation {
         return id;
     }
 
+    public String getIdAsString() {
+        return id.toString();
+    }
+
     public void setId(ObjectId id) {
         this.id = id;
     }
