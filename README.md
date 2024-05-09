@@ -16,10 +16,14 @@ Syncio is a social media platform built with [Java](https://www.java.com/) by a 
 
 ## Features
 
-- User authentication and profile management.
-- Messaging and chat functionality.
-- Customizable user interfaces for admin and regular users.
-- Post creation, sharing, and interaction.
+- **Post Creation and Sharing**: Users can create posts, add filters to images, and share them with others.
+- **Interaction**: Users can comment on, like, share, and report posts.
+- **Messaging and Chat**: Users can engage in one-on-one messaging and create group chats.
+- **User Authentication**: Secure login, signup, and forgot password functionality.
+- **Profile Management**: Users can manage their profiles, including updating information and profile pictures.
+- **Notification Management**: Users can view notifications from the last three days.
+- **Search**: Users can search for other users.
+- **Admin Features**: Admins can manage users, reported posts, hidden posts, and access a dashboard for insights.
 
 ## User Interface
 

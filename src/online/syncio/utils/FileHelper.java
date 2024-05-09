@@ -3,6 +3,7 @@ package online.syncio.utils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -88,33 +89,30 @@ public class FileHelper {
      * @param directory The directory where the ZIP file is located.
      * @param fileName The name of the ZIP file.
      */
-    public static void unzip(String directory, String fileName) {
-        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(directory + "/" + fileName))) {
-            byte[] buffer = new byte[1024];
-            ZipEntry entry;
+    public static void unzip(String directory, String fileName) throws Exception {
+        ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(directory + "/" + fileName));
+        byte[] buffer = new byte[1024];
+        ZipEntry entry;
 
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                File entryFile = new File(directory, entry.getName());
+        while ((entry = zipInputStream.getNextEntry()) != null) {
+            File entryFile = new File(directory, entry.getName());
 
-                if (entry.isDirectory()) {
-                    entryFile.mkdirs();
-                } else {
-                    try (OutputStream outputStream = new FileOutputStream(entryFile)) {
-                        int length;
-                        while ((length = zipInputStream.read(buffer)) > 0) {
-                            outputStream.write(buffer, 0, length);
-                        }
+            if (entry.isDirectory()) {
+                entryFile.mkdirs();
+            } else {
+                try (OutputStream outputStream = new FileOutputStream(entryFile)) {
+                    int length;
+                    while ((length = zipInputStream.read(buffer)) > 0) {
+                        outputStream.write(buffer, 0, length);
                     }
                 }
-
-                zipInputStream.closeEntry();
             }
-            
-            // Close the zipInputStream
-            zipInputStream.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+
+            zipInputStream.closeEntry();
         }
+
+        // Close the zipInputStream
+        zipInputStream.close();
     }
     
     

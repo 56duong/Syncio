@@ -37,7 +37,7 @@ public class MainController {
         this.main = main;
         LATEST_VERSION = getLatestVersion();
         //prevent beta version
-        this.isUpdating = !CURRENT_VERSION.equals(LATEST_VERSION) && !LATEST_VERSION.contains("beta");
+        this.isUpdating = LATEST_VERSION.startsWith("v") && !CURRENT_VERSION.equals(LATEST_VERSION) && !LATEST_VERSION.contains("beta");
     }
 
     /**
@@ -64,13 +64,14 @@ public class MainController {
      */
     public void checkForUpdates() {
         if (isUpdating) {
+            // update
             updateApplication();
-//            JOptionPane.showMessageDialog(this, "Application is updating.\nIt will automatically restart once the update is complete.\nPlease do not close the app while the update is in progress.");
+            System.out.println("Updating");
             GlassPanePopup.showPopup(new MyDialog("Updating", "Application is updating.<br>It will automatically restart once the update is complete.<br>Please do not close the app while the update is in progress."), "dialog");
         }
         else {
             // no
-            System.out.println("khong update");
+            System.out.println("No Update");
         }
     }
     
@@ -87,14 +88,18 @@ public class MainController {
         System.out.println(LINK_TO_UPDATE);
         FileHelper.downloadFileFromWebsite(LINK_TO_UPDATE, CURRENT_DIRECTORY, fileName);
         
-        //unzip
-        FileHelper.unzip(CURRENT_DIRECTORY, fileName);
-        
-        //delete after unzip
-        FileHelper.deleteFile(CURRENT_DIRECTORY, fileName);
-        
-        //restart application
-        ActionHelper.restartApplication();
+        try {
+            //unzip
+            FileHelper.unzip(CURRENT_DIRECTORY, fileName);
+
+            //delete after unzip
+            FileHelper.deleteFile(CURRENT_DIRECTORY, fileName);
+
+            //restart application
+            ActionHelper.restartApplication();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
     
     
@@ -107,7 +112,7 @@ public class MainController {
         String url = "https://github.com/56duong/Syncio/releases";
         String latestVersion = null;
         if(WebsiteHelper.isUrlExists(url)) {
-            latestVersion = WebsiteHelper.getTextFromWeb(Account.GITHUB_REPOSITORIE + "releases", "h2.sr-only");
+            latestVersion = WebsiteHelper.getTextFromWeb(Account.GITHUB_REPOSITORIE + "releases", ".repository-content h2.sr-only");
         }
         return latestVersion;
     }
